@@ -19,6 +19,7 @@ export class PostResolver {
     return ctx.em.findOne(Post, { id });
   }
 
+  // POST
   @Mutation(() => Post)
   async createPost(
     @Arg('title') title: string,
@@ -26,6 +27,23 @@ export class PostResolver {
   ): Promise<Post> {
     const post = ctx.em.create(Post, { title });
     await ctx.em.persistAndFlush(post);
+    return post;
+  }
+
+  // PUT
+  @Mutation(() => Post, { nullable: true })
+  async updatePost(
+    @Arg('id') id: number,
+    @Arg('title', () => String, { nullable: true }) title: string,
+    @Ctx() ctx: TMyContext
+  ): Promise<Post | null> {
+    const post = await ctx.em.findOne(Post, { id });
+    if (!post) return null;
+    if (typeof title !== 'undefined') {
+      post.title = title;
+      await ctx.em.persistAndFlush(post);
+    }
+
     return post;
   }
 }
