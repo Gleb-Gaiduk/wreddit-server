@@ -40,18 +40,54 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() { em }: TMyContext
-  ) {
+  ): Promise<UserResponse> {
+    // Consider using validation lib in the future
+    if (options.username.length <= 2) {
+      return {
+        errors: [
+          {
+            field: 'username',
+            message: 'username lenght might be greater than 2',
+          },
+        ],
+      };
+    }
+
+    if (options.password.length < 8) {
+      return {
+        errors: [
+          {
+            field: 'password',
+            message: 'password length might be at least 8 characters',
+          },
+        ],
+      };
+    }
+
     const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       username: options.username,
       password: hashedPassword,
     });
-    await em.persistAndFlush(user);
-    return user;
+
+    try {
+      await em.persistAndFlush(user);
+    } catch (err) {
+      // Code returned from DB for an existing field
+      if (err.code === '23505') {
+        return {
+          errors: [{ field: 'username', message: 'username already taken' }],
+        };
+      }
+    }
+
+    return {
+      user,
+    };
   }
 
   @Mutation(() => UserResponse)
