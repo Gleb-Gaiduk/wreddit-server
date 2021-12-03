@@ -1,9 +1,6 @@
 import { MikroORM } from '@mikro-orm/core';
 import { ApolloServer } from 'apollo-server-express';
-import connectRedis from 'connect-redis';
 import express from 'express';
-import session from 'express-session';
-import redis from 'redis';
 import { buildSchema } from 'type-graphql';
 import { __prod__ } from './constants';
 import mikroOrmConfig from './mikro-orm.config';
@@ -17,7 +14,10 @@ const main = async () => {
 
   const app = express();
 
-  const RedisStore = connectRedis(session);
+  const redis = require('redis');
+  const session = require('express-session');
+
+  const RedisStore = require('connect-redis')(session);
   const redisClient = redis.createClient();
 
   app.use(
@@ -33,6 +33,7 @@ const main = async () => {
         secure: __prod__,
         sameSite: 'lax',
       },
+      saveUninitialized: false,
       secret: 'sdfdsf24342fdsdfdsf23f2fdwf',
       resave: false,
     })
