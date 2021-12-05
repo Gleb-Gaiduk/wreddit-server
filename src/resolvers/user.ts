@@ -7,6 +7,7 @@ import {
   InputType,
   Mutation,
   ObjectType,
+  Query,
   Resolver,
 } from 'type-graphql';
 import { User } from '../entities/User';
@@ -127,5 +128,16 @@ export class UserResolver {
     return {
       user,
     };
+  }
+
+  @Query(() => User, { nullable: true })
+  async auth(@Ctx() { em, req }: TMyContext) {
+    // User is not logged in
+    if (!req.session.userId) {
+      return null;
+    }
+
+    const user = await em.findOne(User, { id: req.session.userId });
+    return user;
   }
 }
