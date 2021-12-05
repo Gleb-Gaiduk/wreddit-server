@@ -6,7 +6,7 @@
   "scripts": {
     "watch": "tsc -w",
     "start": "node dist/index.js",
-    "dev": "nodemon --delay 500ms dist/index.js",
+    "dev": "sudo kill -9 `sudo lsof -t -i:4000`; nodemon --delay 500ms dist/index.js",
     "create:migration": "mikro-orm migration:create"
   },
   "keywords": [],
