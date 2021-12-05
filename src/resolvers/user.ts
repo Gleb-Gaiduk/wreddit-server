@@ -44,7 +44,7 @@ export class UserResolver {
   @Mutation(() => UserResponse)
   async register(
     @Arg('options') options: UsernamePasswordInput,
-    @Ctx() { em }: TMyContext
+    @Ctx() { em, req }: TMyContext
   ): Promise<UserResponse> {
     // Consider using validation lib in the future
     if (options.username.length <= 2) {
@@ -86,6 +86,8 @@ export class UserResolver {
       }
     }
 
+    req.session.userId = user.id;
+
     return {
       user,
     };
@@ -122,8 +124,9 @@ export class UserResolver {
       };
     }
 
+    // Store userId in session & set a cookie on the user
+    // Keep a user logged in after registration
     req.session.userId = user.id;
-    console.log(req.session);
 
     return {
       user,
