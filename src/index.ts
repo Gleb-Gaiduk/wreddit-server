@@ -1,6 +1,9 @@
 import { MikroORM } from '@mikro-orm/core';
 import { ApolloServer } from 'apollo-server-express';
+// import connectRedis from 'connect-redis';
 import express from 'express';
+import session from 'express-session';
+// import { createClient } from 'redis';
 import { buildSchema } from 'type-graphql';
 import { __prod__ } from './constants';
 import mikroOrmConfig from './mikro-orm.config';
@@ -13,20 +16,18 @@ const main = async () => {
   await orm.getMigrator().up();
 
   const app = express();
+  // app.set('trust proxy', 1);
 
-  const redis = require('redis');
-  const session = require('express-session');
-
-  const RedisStore = require('connect-redis')(session);
-  const redisClient = redis.createClient();
+  // const RedisStore = connectRedis(session);
+  // const redisClient = createClient();
 
   app.use(
     session({
       name: 'qid',
-      store: new RedisStore({
-        client: redisClient,
-        disableTouch: true,
-      }),
+      // store: new RedisStore({
+      //   client: redisClient,
+      //   disableTouch: true,
+      // }),
       cookie: {
         maxAge: 86400 * 3, // 3 days
         httpOnly: true,
@@ -44,7 +45,6 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-
     // context is an object accessible by all the resolvers
     context: ({ req, res }) => ({ em: orm.em, req, res }),
   });
