@@ -12,7 +12,6 @@ import {
 } from 'type-graphql';
 import { User } from '../entities/User';
 
-// Used for typing arguments
 @InputType()
 class UsernamePasswordInput {
   @Field()
@@ -79,7 +78,7 @@ export class UserResolver {
       await em.persistAndFlush(user);
     } catch (err) {
       // Code returned from DB for an existing field
-      if (err.code === '23505') {
+      if (err.detail.includes('already exists')) {
         return {
           errors: [{ field: 'username', message: 'username already taken' }],
         };
