@@ -1,9 +1,11 @@
 import { MikroORM } from '@mikro-orm/core';
 import { ApolloServer } from 'apollo-server-express';
+import connectRedis from 'connect-redis';
 import cors from 'cors';
 // import connectRedis from 'connect-redis';
 import express from 'express';
 import session from 'express-session';
+import Redis from 'ioredis';
 // import { createClient } from 'redis';
 import { buildSchema } from 'type-graphql';
 import { COOKIE_NAME, __prod__ } from './constants';
@@ -17,10 +19,9 @@ const main = async () => {
   await orm.getMigrator().up();
 
   const app = express();
-  // app.set('trust proxy', 1);
 
-  // const RedisStore = connectRedis(session);
-  // const redisClient = createClient();
+  const RedisStore = connectRedis(session);
+  const redis = new Redis();
 
   app.use(
     cors({
@@ -32,10 +33,10 @@ const main = async () => {
   app.use(
     session({
       name: COOKIE_NAME,
-      // store: new RedisStore({
-      //   client: redisClient,
-      //   disableTouch: true,
-      // }),
+      store: new RedisStore({
+        client: redis,
+        disableTouch: true,
+      }),
       cookie: {
         maxAge: 86400 * 3, // 3 days
         httpOnly: true,
@@ -54,7 +55,7 @@ const main = async () => {
       validate: false,
     }),
     // context is an object accessible by all the resolvers
-    context: ({ req, res }) => ({ em: orm.em, req, res }),
+    context: ({ req, res }) => ({ em: orm.em, req, res, redis }),
   });
 
   appoloServer.applyMiddleware({ app, cors: false });
