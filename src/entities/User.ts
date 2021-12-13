@@ -18,6 +18,10 @@ export class User {
 
   @Field()
   @Property({ type: 'text', unique: true })
+  email!: string;
+
+  @Field()
+  @Property({ type: 'text', unique: true })
   username!: string;
 
   // No @Field - not allowed to request from graphql
