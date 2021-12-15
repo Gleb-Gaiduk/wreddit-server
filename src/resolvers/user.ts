@@ -3,10 +3,12 @@ import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   Mutation,
   ObjectType,
   Query,
   Resolver,
+  Root,
 } from 'type-graphql';
 import { v4 } from 'uuid';
 import { COOKIE_NAME, FORGET_PASSWORD_PREFIX } from '../constants';
@@ -34,8 +36,18 @@ class UserResponse {
   user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+  @FieldResolver(() => String)
+  email(@Root() user: User, @Ctx() { req }: TMyContext) {
+    // Show email field only for its owner
+    if (req.session.userId === user.id) {
+      return user.email;
+    }
+    return '';
+    // Current user should not see someone elses email
+  }
+
   // CHANGE PASSWORD
   @Mutation(() => UserResponse)
   async changePassword(
