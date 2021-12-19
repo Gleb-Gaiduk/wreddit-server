@@ -9,6 +9,7 @@ import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
 import { COOKIE_NAME, __prod__ } from './constants';
 import { Post } from './entities/Posts';
+import { Updoot } from './entities/Updoot';
 import { User } from './entities/User';
 import { HelloResolver } from './resolvers/hello';
 import { PostResolver } from './resolvers/post';
@@ -23,7 +24,7 @@ const main = async () => {
     // Show SQL in logs for each operation
     logging: true,
     synchronize: true,
-    entities: [Post, User],
+    entities: [Post, User, Updoot],
     // migrations: [path.join(__dirname, './migrations/*')],
   });
   // await conn.runMigrations();
@@ -48,7 +49,7 @@ const main = async () => {
         disableTouch: true,
       }),
       cookie: {
-        maxAge: 86400 * 3, // 3 days
+        maxAge: 86400000, // 1 day
         httpOnly: true,
         secure: __prod__,
         sameSite: 'lax',

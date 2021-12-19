@@ -3,7 +3,7 @@ import { Redis } from 'ioredis';
 
 declare module 'express-session' {
   export interface SessionData {
-    userId: number;
+    userId?: number;
   }
 }
 
